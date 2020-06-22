@@ -22,15 +22,20 @@ std::unique_ptr<Gdiplus::Bitmap> convolver()
     UINT inSize[2] = {in.GetWidth(), in.GetHeight()};
     std::unique_ptr<Gdiplus::Bitmap> out(new Gdiplus::Bitmap(inSize[0], inSize[1]));
 
-    for (int y = -1; y < (int)inSize[1] - 2; y++)
-        for (int x = -1; x < (int)inSize[0] - 2; x++)
+    for (int y = -1; y < (int)inSize[1] - 1; y++)
+        for (int x = -1; x < (int)inSize[0] - 1; x++)
         {
             int convolved[3];
             for (int b = 0; b < 3; b++)
                 for (int a = 0; a < 3; a++)
                 {
-                    Gdiplus::Color inColor;
-                    in.GetPixel(x + a, y + b, &inColor);
+                    Gdiplus::Color inColor(0, 0, 0);
+                    int xy[2] = {x + a, y + b};
+                    if (xy[0] >= 0 && xy[1] >= 0 && xy[0] <= inSize[0] && xy[1] <= inSize[1])
+                    {
+                        in.GetPixel(xy[0], xy[1], &inColor);
+                    }
+                    int rgb[3] = {inColor.GetR(), inColor.GetG(), inColor.GetB()};
                     convolved[0] += (inColor.GetR() * kernel[a][b]) + bias;
                     convolved[1] += (inColor.GetG() * kernel[a][b]) + bias;
                     convolved[2] += (inColor.GetB() * kernel[a][b]) + bias;
