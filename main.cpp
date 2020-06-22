@@ -16,7 +16,9 @@ VOID process(HDC hdc)
 
 std::unique_ptr<Gdiplus::Bitmap> convolver()
 {
-    int kernel[3][3] = {{0, -1, 0}, {-1, 4, -1}, {0, -1, 0}};
+    int kernel[3][3][3] = {{{-1, -1, -1}, {0, 1, -1}, {0, 1, 1}},
+                          {{1, 0, 0}, {1, -1, -1}, {1, 0, -1}},
+                          {{0, 1, 1}, {0, 1, 0}, {1, -1, 1}}};
     int bias = 0;
     Gdiplus::Bitmap in(L"images/image1.jpg");
     UINT inSize[2] = {in.GetWidth(), in.GetHeight()};
@@ -35,11 +37,12 @@ std::unique_ptr<Gdiplus::Bitmap> convolver()
                     {
                         in.GetPixel(xy[0], xy[1], &inColor);
                     }
-                    convolved += (inColor.GetR() * kernel[a][b]) +
-                                 (inColor.GetG() * kernel[a][b]) +
-                                 (inColor.GetB() * kernel[a][b]) +
+                    convolved += (inColor.GetR() * kernel[0][a][b]) +
+                                 (inColor.GetG() * kernel[1][a][b]) +
+                                 (inColor.GetB() * kernel[2][a][b]) +
                                  bias;
                 }
+            convolved = (((0) > (convolved)) ? (0) : (convolved));
             Gdiplus::Color outColor(convolved, convolved, convolved);
             out->SetPixel(x + 1, y + 1, outColor);
         }
