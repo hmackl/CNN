@@ -23,5 +23,5 @@ protected:
 class Convolver : public Neuron
 {
 public:
-    BYTE *convolve(int *kernel, int channels, int stride);
+    void convolve(int *kernel, int channels, int stride);
 };

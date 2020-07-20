@@ -1,8 +1,8 @@
 #include "main.h"
 
-BYTE *Convolver::convolve(int *kernel, int channels, int stride)
+void Convolver::convolve(int *kernel, int channels, int stride)
 {
-    BYTE *out = new BYTE[size * size * 3];
+    //BYTE *out = new BYTE[size * size * 3];
 
     for (int y = -1; y < (int)size - 1; y += stride)
         for (int x = -1; x < (int)size - 1; x += stride)
@@ -20,7 +20,6 @@ BYTE *Convolver::convolve(int *kernel, int channels, int stride)
                         }
                 }
             convolved = (((0) > (convolved)) ? (0) : (convolved));
-            out[(size * (y + 1) + (x + 1)) * 3] = convolved;
+            inPtr[(size * (y + 1) + (x + 1)) * 3] = convolved;
         }
-    return out;
 }

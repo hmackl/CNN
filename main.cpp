@@ -11,27 +11,34 @@ BYTE *openImage(BYTE *in, UINT size[2], int outSize);
 void process(HDC hdc)
 {
     Gdiplus::Graphics window(hdc);
-    Gdiplus::Bitmap in(L"images/image2.jpg");
+    Gdiplus::Bitmap in(L"images/image1.jpg");
     UINT inSize[2] = {in.GetWidth(), in.GetHeight()};
     Gdiplus::Rect inRect(0, 0, inSize[0], inSize[1]);
     Gdiplus::BitmapData inData;
     in.LockBits(&inRect, Gdiplus::ImageLockModeRead, in.GetPixelFormat(), &inData);
-    BYTE *inPtr = (BYTE *)inData.Scan0;
+    BYTE *bits = (BYTE *)inData.Scan0;
     in.UnlockBits(&inData);
     int outSize = 448;
-    BYTE *bits = openImage(inPtr, inSize, outSize);
+    bits = openImage(bits, inSize, outSize);
     int channels = 3;
     int kernel[27] = {-1, -1, -1, 0, 1, -1, 0, 1, 1,
                       1, 0, 0, 1, -1, -1, 1, 0, -1,
                       0, 1, 1, 0, 1, 0, 1, -1, 1};
     int stride = 1;
     Convolver convolver;
-    convolver.setPtr(bits);
-    convolver.setSize(outSize);
-    bits = convolver.convolve(kernel, channels, stride);
-    Gdiplus::Bitmap out(outSize, outSize, outSize * 3, PixelFormat24bppRGB, bits); 
-    Gdiplus::CachedBitmap cachedBitmap(&out, &window);
-    window.DrawCachedBitmap(&cachedBitmap, 10, 10);
+    convolver.setSize(64);
+    BYTE *cell = new BYTE[12480];
+    for (int y = 0; y < 7; y++)
+        for (int x = 0; x < 7; x++)
+        {
+            for (int i = 0; i < 65; i++)
+                memcpy(cell + (i * 192), bits + (192 * x) + (i * 1344) + (y * 86016), 192);
+            convolver.setPtr(cell);
+            convolver.convolve(kernel, channels, stride);
+            Gdiplus::Bitmap out(64, 64, 192, PixelFormat24bppRGB, cell);
+            Gdiplus::CachedBitmap cachedBitmap(&out, &window);
+            window.DrawCachedBitmap(&cachedBitmap, 10 + (64 * x), 10 + (64 * y));
+        }
 }
 
 BYTE *openImage(BYTE *inData, UINT size[2], int outSize)
